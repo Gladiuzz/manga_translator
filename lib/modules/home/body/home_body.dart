@@ -16,6 +16,7 @@ class _HomeBodyState extends State<HomeBody> {
   MangaImageBloc? mangaImageBloc;
   final ImagePicker _picker = ImagePicker();
   bool isLoading = false;
+
   @override
   void initState() {
     super.initState();
@@ -41,56 +42,65 @@ class _HomeBodyState extends State<HomeBody> {
   }
 
   Future<bool> pickImageAndAdd(BuildContext context) async {
-    final state = context.read<MangaImageBloc>().state;
-    int currentCount = 0;
-    if (state is MangaImageLoaded) {
-      currentCount = state.response.length;
-    }
-
-    const maxImages = 4;
-    final remaining = maxImages - currentCount;
-
-    if (remaining <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Maksimal 4 gambar boleh dipilih.')),
-      );
-      return false;
-    }
-
     final pickedFiles = await _picker.pickMultiImage();
+
     if (pickedFiles.isEmpty) return false;
 
-    final limitedFiles = pickedFiles.take(remaining).toList();
-    final paths = limitedFiles.map((xfile) => xfile.path).toList();
+    final paths = pickedFiles.map((xfile) => xfile.path).toList();
 
-    context.read<MangaImageBloc>().add(AddImages(paths));
+    mangaImageBloc!.add(AddImages(paths));
     return true;
   }
 
   Widget _body() {
+    final double buttonWidth = MediaQuery.of(context).size.width * 0.6;
     return Center(
-      child: isLoading
-          ? CircularProgressIndicator()
-          : ElevatedButton(
-              onPressed: () async {
-                onTranslatePressed(context);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  side: BorderSide(color: Colors.black),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          isLoading
+              ? CircularProgressIndicator()
+              : SizedBox(
+                  width: buttonWidth,
+                  child: ElevatedButton.icon(
+                    icon: Icon(Icons.upload, size: 24),
+                    label: Text(
+                      "Upload Image",
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.roboto(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    ),
+                    onPressed: () async {
+                      onTranslatePressed(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      iconColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: BorderSide(color: Colors.black),
+                      ),
+                      padding: EdgeInsets.only(
+                        top: 8,
+                        bottom: 8,
+                        left: 16,
+                        right: 16,
+                      ),
+                      elevation: 0,
+                    ),
+                  ),
                 ),
-                padding: EdgeInsets.only(
-                  top: 8,
-                  bottom: 8,
-                  left: 24,
-                  right: 24,
-                ),
-                elevation: 0,
-              ),
-              child: Text(
-                "Upload Image",
+          SizedBox(height: 8),
+          SizedBox(
+            width: buttonWidth,
+            child: ElevatedButton.icon(
+              icon: Icon(Icons.history, size: 24),
+              label: Text(
+                "History Translation",
                 overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.roboto(
                   color: Colors.black,
@@ -98,7 +108,28 @@ class _HomeBodyState extends State<HomeBody> {
                   fontSize: 16,
                 ),
               ),
+              onPressed: () async {
+                Navigator.of(context).pushNamed(historyRoute);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                iconColor: Colors.black,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(color: Colors.black),
+                ),
+                padding: EdgeInsets.only(
+                  top: 8,
+                  bottom: 8,
+                  left: 16,
+                  right: 16,
+                ),
+                elevation: 0,
+              ),
             ),
+          ),
+        ],
+      ),
     );
   }
 

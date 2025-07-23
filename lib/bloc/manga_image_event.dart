@@ -1,6 +1,6 @@
 part of 'manga_image_bloc.dart';
 
-sealed class MangaImageEvent extends Equatable {
+abstract class MangaImageEvent extends Equatable {
   const MangaImageEvent();
 
   @override
@@ -15,11 +15,23 @@ class AddImages extends MangaImageEvent {
   List<Object> get props => [paths];
 }
 
-class RemoveImages extends MangaImageEvent {
+class UploadImages extends MangaImageEvent {
+  const UploadImages();
+
+  @override
+  List<Object> get props => [];
+}
+
+class RemoveImage extends MangaImageEvent {
   final int index;
 
-  const RemoveImages(this.index);
+  const RemoveImage(this.index);
 
   @override
   List<Object> get props => [index];
+}
+
+class RemoveImages extends MangaImageEvent {
+  @override
+  List<Object> get props => [];
 }

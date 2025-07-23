@@ -24,39 +24,50 @@ class _ListImageBodyState extends State<ListImageBody> {
     mangaImageBloc = context.read<MangaImageBloc>();
   }
 
+  // Future<void> pickImageAndAdd(BuildContext context) async {
+  //   final state = context.read<MangaImageBloc>().state;
+  //   int currentCount = 0;
+  //   if (state is MangaImageLoaded) {
+  //     currentCount = state.response.length;
+  //   }
+
+  //   const maxImages = 4;
+  //   final remaining = maxImages - currentCount;
+
+  //   if (remaining <= 0) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text('Maksimal 4 gambar yang boleh diupload')),
+  //     );
+  //     return;
+  //   }
+
+  //   final pickedFiles = await _picker.pickMultiImage();
+
+  //   if (pickedFiles.isEmpty) {
+  //     return;
+  //   }
+
+  //   // Ambil hanya sejumlah yang dibolehkan
+  //   final limitedFiles = pickedFiles.take(remaining).toList();
+  //   final paths = limitedFiles.map((xfile) => xfile.path).toList();
+
+  //   context.read<MangaImageBloc>().add(AddImages(paths));
+  // }
+
   Future<void> pickImageAndAdd(BuildContext context) async {
-    final state = context.read<MangaImageBloc>().state;
-    int currentCount = 0;
-    if (state is MangaImageLoaded) {
-      currentCount = state.response.length;
-    }
-
-    const maxImages = 4;
-    final remaining = maxImages - currentCount;
-
-    if (remaining <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Maksimal 4 gambar yang boleh diupload')),
-      );
-      return;
-    }
-
     final pickedFiles = await _picker.pickMultiImage();
 
-    if (pickedFiles.isEmpty) {
-      return;
-    }
+    if (pickedFiles.isEmpty) return;
 
-    // Ambil hanya sejumlah yang dibolehkan
-    final limitedFiles = pickedFiles.take(remaining).toList();
-    final paths = limitedFiles.map((xfile) => xfile.path).toList();
+    final paths = pickedFiles.map((xfile) => xfile.path).toList();
 
-    context.read<MangaImageBloc>().add(AddImages(paths));
+    mangaImageBloc!.add(AddImages(paths));
   }
 
   Widget headerAddImages() {
     return Container(
       width: MediaQuery.of(context).size.width,
+      color: Colors.white,
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -72,13 +83,11 @@ class _ListImageBodyState extends State<ListImageBody> {
                   ),
                 );
               }
-              return Container(
-                child: Text(
-                  "Gambar yang dipilih (0)",
-                  style: GoogleFonts.roboto(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 16,
-                  ),
+              return Text(
+                "Gambar yang dipilih (0)",
+                style: GoogleFonts.roboto(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 16,
                 ),
               );
             },
@@ -98,109 +107,111 @@ class _ListImageBodyState extends State<ListImageBody> {
 
   Widget _body() {
     return SafeArea(
-      child: Column(
-        children: <Widget>[
-          headerAddImages(),
-          SizedBox(height: 26.0),
-          BlocBuilder<MangaImageBloc, MangaImageState>(
-            builder: (context, state) {
-              if (state is MangaImageLoading) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (state is MangaImageFailed) {
-                return SnackBar(
-                  content: Text('Gambar tidak boleh lebih dari 4'),
-                  duration: Duration(seconds: 4),
-                );
-              } else if (state is MangaImageLoaded) {
-                final images = state.response;
+      child: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            headerAddImages(),
+            BlocBuilder<MangaImageBloc, MangaImageState>(
+              builder: (context, state) {
+                if (state is MangaImageLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (state is MangaImageFailed) {
+                  return SnackBar(
+                    content: Text('Gambar tidak boleh lebih dari 4'),
+                    duration: Duration(seconds: 4),
+                  );
+                } else if (state is MangaImageLoaded) {
+                  final images = state.response;
 
-                return Column(
-                  children: [
-                    SingleChildScrollView(
-                      child: GridView.builder(
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        padding: const EdgeInsets.all(16),
-                        itemCount: images.length,
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              mainAxisSpacing: 16,
-                              crossAxisSpacing: 16,
-                            ),
-                        itemBuilder: (context, index) {
-                          final image = images[index];
-                          return Stack(
-                            children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.grey[300],
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Image.file(
-                                    File(image.path!),
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                  ),
-                                ),
+                  return Column(
+                    children: [
+                      SingleChildScrollView(
+                        child: GridView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          padding: const EdgeInsets.all(16),
+                          itemCount: images.length,
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                mainAxisSpacing: 16,
+                                crossAxisSpacing: 16,
                               ),
-                              Positioned(
-                                top: 4,
-                                right: 4,
-                                child: GestureDetector(
-                                  onTap: () {
-                                    context.read<MangaImageBloc>().add(
-                                      RemoveImages(index),
-                                    );
-                                  },
-                                  child: const CircleAvatar(
-                                    radius: 12,
-                                    backgroundColor: Colors.white,
-                                    child: Icon(
-                                      Icons.close,
-                                      size: 16,
-                                      color: Colors.black,
+                          itemBuilder: (context, index) {
+                            final image = images[index];
+                            return Stack(
+                              children: [
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[300],
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.file(
+                                      File(image.path!),
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                      height: double.infinity,
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          );
-                        },
+                                Positioned(
+                                  top: 4,
+                                  right: 4,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      context.read<MangaImageBloc>().add(
+                                        RemoveImage(index),
+                                      );
+                                    },
+                                    child: const CircleAvatar(
+                                      radius: 12,
+                                      backgroundColor: Colors.white,
+                                      child: Icon(
+                                        Icons.close,
+                                        size: 16,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
                       ),
-                    ),
 
-                    // Tombol Menerjemahkan tetap di luar GridView
-                    images.isNotEmpty
-                        ? Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            child: ElevatedButton(
-                              onPressed: () {
-                                // Fungsi translate
-                                Navigator.of(
-                                  context,
-                                ).pushReplacementNamed(loadingRoute);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                foregroundColor: Colors.black,
-                                side: const BorderSide(color: Colors.black),
+                      // Tombol Menerjemahkan tetap di luar GridView
+                      images.isNotEmpty
+                          ? Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  Navigator.pushNamed(
+                                    context,
+                                    loadingRoute,
+                                    arguments: images,
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: Colors.black,
+                                  side: const BorderSide(color: Colors.black),
+                                ),
+                                child: const Text("Menerjemahkan"),
                               ),
-                              child: const Text("Menerjemahkan"),
-                            ),
-                          )
-                        : Container(),
-                  ],
-                );
-              } else {
-                return Container();
-              }
-            },
-          ),
-        ],
+                            )
+                          : Container(),
+                    ],
+                  );
+                } else {
+                  return Container();
+                }
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -211,6 +222,7 @@ class _ListImageBodyState extends State<ListImageBody> {
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         title: Text(
           "App Title",
           style: GoogleFonts.roboto(fontSize: 16, fontWeight: FontWeight.bold),
