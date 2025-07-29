@@ -64,6 +64,10 @@ class _ListImageBodyState extends State<ListImageBody> {
     mangaImageBloc!.add(AddImages(paths));
   }
 
+  void _removeImages() {
+    mangaImageBloc!.add(RemoveImages());
+  }
+
   Widget headerAddImages() {
     return Container(
       width: MediaQuery.of(context).size.width,
@@ -115,12 +119,14 @@ class _ListImageBodyState extends State<ListImageBody> {
               builder: (context, state) {
                 if (state is MangaImageLoading) {
                   return const Center(child: CircularProgressIndicator());
-                } else if (state is MangaImageFailed) {
-                  return SnackBar(
-                    content: Text('Gambar tidak boleh lebih dari 4'),
-                    duration: Duration(seconds: 4),
-                  );
-                } else if (state is MangaImageLoaded) {
+                }
+                // else if (state is MangaImageFailed) {
+                //   return SnackBar(
+                //     content: Text('Gambar tidak boleh lebih dari 4'),
+                //     duration: Duration(seconds: 4),
+                //   );
+                // }
+                else if (state is MangaImageLoaded) {
                   final images = state.response;
 
                   return Column(
@@ -223,11 +229,19 @@ class _ListImageBodyState extends State<ListImageBody> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
+        centerTitle: true,
         title: Text(
-          "App Title",
+          "List Image",
           style: GoogleFonts.roboto(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         automaticallyImplyLeading: false,
+        leading: IconButton(
+          onPressed: () {
+            _removeImages();
+            Navigator.of(context).pop();
+          },
+          icon: Icon(Icons.arrow_back, size: 24),
+        ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1.0),
           child: Container(color: Colors.black, height: 1.0),

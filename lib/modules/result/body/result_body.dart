@@ -38,67 +38,74 @@ class _ResultBodyState extends State<ResultBody> {
   ) async {
     final titleController = TextEditingController();
 
+    bool isSaving = false;
+
     await showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        title: const Text("Nama Folder"),
-        content: TextField(
-          controller: titleController,
-          decoration: const InputDecoration(
-            hintText: "Masukkan nama folder untuk disimpan",
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(), // batal
-            child: isSaving
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text("Batal"),
-          ),
-          TextButton(
-            onPressed: () async {
-              final title = titleController.text.trim();
-              if (title.isEmpty) return;
+      barrierDismissible: false,
+      builder: (context) {
+        bool isSaving = false;
 
-              setState(() {
-                isSaving = true;
-              });
-
-              await Future.delayed(const Duration(seconds: 3));
-
-              await saveAllWithTitle(context, results, title);
-
-              Navigator.of(context).pop(); // tutup dialog
-
-              if (context.mounted) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Gambar dan riwayat berhasil disimpan."),
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor: Colors.white,
+              content: isSaving
+                  ? const SizedBox(
+                      height: 80,
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                  : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text("Nama Folder"),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: titleController,
+                          decoration: const InputDecoration(
+                            hintText: "Masukkan nama folder",
+                          ),
+                        ),
+                      ],
                     ),
-                  );
-                });
-              }
+              actions: isSaving
+                  ? []
+                  : [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text("Batal"),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          final title = titleController.text.trim();
+                          if (title.isEmpty) return;
 
-              setState(() {
-                isSaving = false;
-              });
-            },
-            child: isSaving
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text("Simpan"),
-          ),
-        ],
-      ),
+                          setState(() => isSaving = true);
+
+                          await Future.delayed(const Duration(seconds: 3));
+                          await saveAllWithTitle(context, results, title);
+
+                          if (context.mounted) {
+                            Navigator.of(context).pop();
+
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    "Gambar dan riwayat berhasil disimpan.",
+                                  ),
+                                ),
+                              );
+                            });
+                          }
+                        },
+                        child: const Text("Simpan"),
+                      ),
+                    ],
+            );
+          },
+        );
+      },
     );
   }
 
@@ -221,8 +228,9 @@ class _ResultBodyState extends State<ResultBody> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
+        centerTitle: true,
         title: Text(
-          "App Title",
+          "Result",
           style: GoogleFonts.roboto(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         leading: IconButton(
