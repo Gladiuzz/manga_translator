@@ -38,6 +38,7 @@ class _HistoryBodyState extends State<HistoryBody> {
         } else if (state is HistoryLoaded) {
           final histories = state.response;
 
+          histories.sort((a, b) => b.translateDate.compareTo(a.translateDate));
           if (histories.isEmpty) {
             return Align(
               alignment: Alignment.center,
@@ -60,8 +61,8 @@ class _HistoryBodyState extends State<HistoryBody> {
               final item = histories[index];
 
               // Decode dari JSON ke List<MangaImageModel>
-              final imageModels = (jsonDecode(item.imagePaths) as List)
-                  .map((e) => MangaImageModel.fromJson(e))
+              final imageModels = item.imagePaths
+                  .map((path) => MangaImageModel(path: path))
                   .toList();
 
               return HistoryCard(

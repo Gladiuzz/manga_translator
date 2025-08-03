@@ -1,95 +1,84 @@
 import 'dart:convert';
 import 'dart:io';
-
-import 'package:isar/isar.dart';
+import 'package:hive/hive.dart';
 import 'package:manga_translator/models/history_model.dart';
 import 'package:manga_translator/models/manga_image_model.dart';
 
 abstract class HistoryRepository {
   Future<void> saveHistory(String title, List<MangaImageModel> imagePaths);
   Future<List<HistoryModel>> getAll();
-  Future<void> deleteHistory(int id);
-  Future<void> deleteMultiple(List<int> ids);
+  Future<void> deleteHistory(int index);
+  Future<void> deleteMultiple(List<int> indexes);
 }
 
 class HistoryService implements HistoryRepository {
-  final Isar isar;
+  final Box<HistoryModel> box;
 
-  HistoryService(this.isar);
+  HistoryService(this.box);
 
   @override
   Future<void> saveHistory(
     String title,
     List<MangaImageModel> imagePaths,
   ) async {
-    final jsonStr = jsonEncode(imagePaths.map((e) => e.toJson()).toList());
+    final nextId = box.length;
 
-    final history = HistoryModel()
-      ..title = title
-      ..translateDate = DateTime.now()
-      ..imagePaths = jsonStr;
+    // Ambil hanya path-nya saja
+    final pathList = imagePaths.map((e) => e.path ?? '').toList();
 
-    await isar.writeTxn(() async {
-      await isar.historyModels.put(history);
-    });
+    final history = HistoryModel(
+      title: title,
+      translateDate: DateTime.now(),
+      imagePaths: pathList, // << List<String>
+      id: nextId,
+    );
+
+    await box.add(history);
   }
 
   @override
   Future<List<HistoryModel>> getAll() async {
-    return await isar.historyModels.where().sortByTranslateDate().findAll();
+    return box.values.toList()
+      ..sort((a, b) => b.translateDate.compareTo(a.translateDate));
   }
 
   @override
-  Future<void> deleteHistory(int id) async {
-    await isar.writeTxn(() async {
-      await isar.historyModels.delete(id);
-    });
+  Future<void> deleteHistory(int index) async {
+    await box.deleteAt(index);
   }
 
-  Future<void> deleteWithFiles(int id) async {
-    final item = await isar.historyModels.get(id);
+  Future<void> deleteWithFiles(int index) async {
+    final item = box.getAt(index);
     if (item != null) {
       try {
-        final images = (jsonDecode(item.imagePaths) as List)
-            .map((e) => MangaImageModel.fromJson(e))
-            .toList();
-
-        // Dapatkan folder tempat gambar disimpan
-        final firstImagePath = images.first.path;
+        final firstImagePath = item.imagePaths.isNotEmpty
+            ? item.imagePaths.first
+            : null;
         final folder = firstImagePath != null
             ? File(firstImagePath).parent
             : null;
 
-        // Hapus semua file gambar
-        for (var image in images) {
-          final file = File(image.path ?? '');
-          if (file.existsSync()) {
-            await file.delete();
-          }
+        for (var path in item.imagePaths) {
+          final file = File(path);
+          if (file.existsSync()) await file.delete();
         }
 
-        // Hapus folder jika kosong (dan bukan null)
         if (folder != null && folder.existsSync()) {
           final contents = folder.listSync();
-          if (contents.isEmpty) {
-            await folder.delete();
-          }
+          if (contents.isEmpty) await folder.delete();
         }
       } catch (e) {
         print("Gagal menghapus file atau folder: $e");
       }
 
-      // Hapus dari database
-      await isar.writeTxn(() async {
-        await isar.historyModels.delete(id);
-      });
+      await box.deleteAt(index);
     }
   }
 
   @override
-  Future<void> deleteMultiple(List<int> ids) async {
-    for (final id in ids) {
-      await deleteWithFiles(id);
+  Future<void> deleteMultiple(List<int> indexes) async {
+    for (final index in indexes) {
+      await deleteWithFiles(index);
     }
   }
 }

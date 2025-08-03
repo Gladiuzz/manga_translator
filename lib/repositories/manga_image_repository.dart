@@ -11,7 +11,7 @@ abstract class MangaImageRepository {
 class MangaImageService implements MangaImageRepository {
   final Dio dio = Dio();
   // final String baseUrl = 'http://192.168.100.202:8000/translate';
-  final String baseUrl = 'https://8c0a7d2c9554.ngrok-free.app/translate';
+  final String baseUrl = 'https://cdbf404cba21.ngrok-free.app/translate';
 
   @override
   Future<File?> uploadImage(MangaImageModel manga) async {
@@ -28,8 +28,6 @@ class MangaImageService implements MangaImageRepository {
         options: Options(responseType: ResponseType.bytes),
       );
 
-      print("Hasil Response ${response}");
-
       if (response.statusCode == 200) {
         final tempDir = await getTemporaryDirectory();
         final translatedFile = File(
@@ -37,11 +35,25 @@ class MangaImageService implements MangaImageRepository {
         );
         await translatedFile.writeAsBytes(response.data);
         return translatedFile;
+      } else {
+        throw Exception("Gagal upload: ${response.statusCode}");
+      }
+    } on DioError catch (e) {
+      print("DioError upload index ${manga.index}: ${e.message}");
+
+      // Lempar exception agar bisa ditangkap oleh BLoC
+      if (e.type == DioErrorType.connectionTimeout ||
+          e.type == DioErrorType.sendTimeout ||
+          e.type == DioErrorType.receiveTimeout ||
+          e.type == DioErrorType.unknown ||
+          e.message!.contains("Failed host lookup")) {
+        throw SocketException("Tidak ada koneksi internet");
+      } else {
+        throw Exception("Gagal upload gambar.");
       }
     } catch (e) {
-      print("Error upload index ${manga.index}: $e");
+      print("Error umum upload index ${manga.index}: $e");
+      throw Exception("Kesalahan tak terduga saat upload.");
     }
-
-    return null;
   }
 }

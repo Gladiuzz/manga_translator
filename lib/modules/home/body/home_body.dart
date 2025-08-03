@@ -45,17 +45,20 @@ class _HomeBodyState extends State<HomeBody> {
   }
 
   Future<void> onTranslatePressed(BuildContext context) async {
-    await pickImageAndAdd(context);
+    // Pilih gambar
+    final success = await pickImageAndAdd(context);
 
-    // Tampilkan dialog loading
+    if (!success) return;
+
+    // Tampilkan dialog loading hanya jika gambar berhasil dipilih
     showLoadingDialog(context);
 
-    // Simulasikan proses 2 detik
+    // Simulasi proses atau bisa diganti dengan pemanggilan API
     await Future.delayed(const Duration(seconds: 2));
 
-    // Tutup loading dialog jika masih ada
+    // Tutup loading dan navigasi ke halaman list image
     if (context.mounted) {
-      Navigator.of(context).pop(); // menutup dialog
+      Navigator.of(context).pop(); // Tutup loading dialog
       Navigator.of(context).pushNamed(listImageRoute);
     }
   }

@@ -29,10 +29,11 @@ class MangaImageBloc extends Bloc<MangaImageEvent, MangaImageState> {
 
     final newList = [
       ...currentList,
-      ...event.paths.map((path) => MangaImageModel(path: path)),
+      ...event.paths.map(
+        (path) => MangaImageModel(path: path, isTranslated: false),
+      ),
     ];
 
-    originalImages = newList;
     emit(MangaImageLoaded(response: newList));
   }
 
@@ -40,7 +41,9 @@ class MangaImageBloc extends Bloc<MangaImageEvent, MangaImageState> {
     UploadImages event,
     Emitter<MangaImageState> emit,
   ) async {
-    if (originalImages.isEmpty) {
+    final currentState = state;
+
+    if (currentState is! MangaImageLoaded || currentState.response.isEmpty) {
       emit(
         const MangaImageFailed(
           textFailed: "Tidak ada gambar untuk diterjemahkan.",
@@ -50,22 +53,35 @@ class MangaImageBloc extends Bloc<MangaImageEvent, MangaImageState> {
     }
 
     emit(MangaImageLoading());
+
     final List<MangaImageModel> translatedResults = [];
 
-    for (final image in originalImages) {
-      final file = await repository.uploadImage(image);
-      if (file != null) {
-        translatedResults.add(
-          MangaImageModel(path: file.path, index: image.index),
-        );
+    try {
+      for (final image in currentState.response) {
+        final file = await repository.uploadImage(image);
+        if (file != null) {
+          translatedResults.add(
+            MangaImageModel(
+              path: file.path,
+              index: image.index,
+              isTranslated: true,
+            ),
+          );
+        }
       }
-    }
 
-    if (translatedResults.isNotEmpty) {
-      emit(MangaImageLoaded(response: translatedResults));
-    } else {
+      if (translatedResults.isNotEmpty) {
+        emit(MangaImageLoaded(response: translatedResults));
+      }
+    } catch (e) {
+      final message = e.toString().contains("Socket")
+          ? "Tidak ada koneksi internet."
+          : "Terjadi kesalahan saat mengunggah gambar.";
       emit(
-        const MangaImageFailed(textFailed: "Gagal menerjemahkan semua gambar."),
+        MangaImageFailed(
+          textFailed: message,
+          originalImages: currentState.response,
+        ),
       );
     }
   }

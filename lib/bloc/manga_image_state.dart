@@ -23,7 +23,14 @@ class MangaImageLoaded extends MangaImageState {
 }
 
 class MangaImageFailed extends MangaImageState {
-  final String? textFailed;
+  final String textFailed;
+  final List<MangaImageModel> originalImages;
 
-  const MangaImageFailed({this.textFailed});
+  const MangaImageFailed({
+    required this.textFailed,
+    this.originalImages = const [],
+  });
+
+  @override
+  List<Object> get props => [textFailed, originalImages];
 }

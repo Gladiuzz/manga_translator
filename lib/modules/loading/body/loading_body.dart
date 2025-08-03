@@ -23,15 +23,28 @@ class _LoadingBodyState extends State<LoadingBody> {
   @override
   void initState() {
     super.initState();
+
     mangaImageBloc = context.read<MangaImageBloc>();
-    _startTime = DateTime.now();
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      final now = DateTime.now();
-      setState(() {
-        _elapsedSeconds = now.difference(_startTime).inSeconds;
+
+    // Ambil list gambar dari argument saat navigasi
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final args = ModalRoute.of(context)?.settings.arguments;
+      if (args is List<MangaImageModel> && args.isNotEmpty) {
+        mangaImageBloc!.add(
+          RemoveImages(),
+        ); // clear dulu untuk mencegah duplikasi
+        mangaImageBloc!.add(AddImages(args.map((e) => e.path!).toList()));
+      }
+
+      _onUploadImagesManga();
+      _startTime = DateTime.now();
+      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        final now = DateTime.now();
+        setState(() {
+          _elapsedSeconds = now.difference(_startTime).inSeconds;
+        });
       });
     });
-    _onUploadImagesManga();
   }
 
   void _onUploadImagesManga() {
@@ -98,27 +111,69 @@ class _LoadingBodyState extends State<LoadingBody> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: BlocConsumer<MangaImageBloc, MangaImageState>(
-        listener: (context, state) {
-          if (state is MangaImageLoading) {
-            print("Loading");
-          }
-          if (state is MangaImageLoaded) {
-            Navigator.of(
-              context,
-            ).pushReplacementNamed(resultRoute, arguments: state.response);
-          } else if (state is MangaImageFailed) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.textFailed!)));
-            Navigator.of(context).pop();
-          }
-        },
-        builder: (context, state) {
-          return _body();
-        },
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: BlocConsumer<MangaImageBloc, MangaImageState>(
+          listener: (context, state) {
+            print("[STATE] $state");
+
+            if (state is MangaImageLoading) {
+              print(">> Loading");
+            }
+            if (state is MangaImageLoaded) {
+              final images = state.response;
+
+              final allTranslated =
+                  images.isNotEmpty && images.every((img) => img.isTranslated);
+
+              if (allTranslated) {
+                Navigator.of(
+                  context,
+                ).pushReplacementNamed(resultRoute, arguments: images);
+              } else {
+                print("[INFO] Belum semua gambar diterjemahkan. Tidak lanjut.");
+              }
+            } else if (state is MangaImageFailed) {
+              final text = state.textFailed ?? "";
+              final failedImages = state.originalImages;
+
+              if (text.toLowerCase().contains("koneksi")) {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text("Koneksi Gagal"),
+                    content: const Text(
+                      "Tidak ada koneksi internet. Silakan periksa koneksi Anda.",
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          // Kirim kembali gambar ke BLoC agar tampil lagi
+                          context.read<MangaImageBloc>().add(RemoveImages());
+                          context.read<MangaImageBloc>().add(
+                            AddImages(
+                              failedImages.map((e) => e.path!).toList(),
+                            ),
+                          );
+                          Navigator.of(
+                            context,
+                          ).pushReplacementNamed(listImageRoute);
+                        },
+                        child: const Text("OK"),
+                      ),
+                    ],
+                  ),
+                );
+              }
+            }
+          },
+          builder: (context, state) {
+            return _body();
+          },
+        ),
       ),
     );
   }

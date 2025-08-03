@@ -68,8 +68,17 @@ class _HistoryDetailBodyState extends State<HistoryDetailBody> {
               const SizedBox(height: 8),
               Text('Tanggal: $formattedDate', style: GoogleFonts.roboto()),
               const SizedBox(height: 8),
-              // Text('List Gambar :', style: GoogleFonts.roboto()),
-              // Text('${widget.imagePaths}', style: GoogleFonts.roboto()),
+              Text(
+                'Path Gambar:',
+                style: GoogleFonts.roboto(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 4),
+              ...widget.imagePaths.map(
+                (img) => Text(
+                  "- ${img.path}",
+                  style: GoogleFonts.roboto(fontSize: 12),
+                ),
+              ),
             ],
           ),
           actions: [

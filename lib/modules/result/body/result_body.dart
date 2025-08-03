@@ -9,7 +9,6 @@ import 'package:manga_translator/models/manga_image_model.dart';
 import 'package:manga_translator/routes/routes.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:path/path.dart' as path;
 
 class ResultBody extends StatefulWidget {
   const ResultBody({super.key});
@@ -37,8 +36,6 @@ class _ResultBodyState extends State<ResultBody> {
     List<MangaImageModel> results,
   ) async {
     final titleController = TextEditingController();
-
-    bool isSaving = false;
 
     await showDialog(
       context: context,
@@ -128,7 +125,7 @@ class _ResultBodyState extends State<ResultBody> {
       await folder.create(recursive: true);
     }
 
-    final List<MangaImageModel> savedImages = [];
+    final List<MangaImageModel> savedPaths = [];
     for (int i = 0; i < results.length; i++) {
       final file = File(results[i].path!);
       final fileName = 'page_$i.png';
@@ -136,14 +133,14 @@ class _ResultBodyState extends State<ResultBody> {
 
       try {
         await file.copy(targetPath);
-        savedImages.add(MangaImageModel(path: targetPath, index: i));
+        savedPaths.add(MangaImageModel(path: targetPath, index: i));
       } catch (e) {
         print("Gagal menyimpan gambar $i: $e");
       }
     }
 
     if (context.mounted) {
-      context.read<HistoryBloc>().add(AddHistory(title, savedImages));
+      context.read<HistoryBloc>().add(AddHistory(title, savedPaths));
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -223,42 +220,48 @@ class _ResultBodyState extends State<ResultBody> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      backgroundColor: Colors.white,
-      appBar: AppBar(
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        resizeToAvoidBottomInset: true,
         backgroundColor: Colors.white,
-        centerTitle: true,
-        title: Text(
-          "Result",
-          style: GoogleFonts.roboto(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        leading: IconButton(
-          onPressed: () {
-            _removeImages();
-            Navigator.of(context).pushReplacementNamed(homeRoute);
-          },
-          icon: Icon(Icons.arrow_back, size: 24),
-        ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              final state = context.read<MangaImageBloc>().state;
-              if (state is MangaImageLoaded) {
-                showDownloadDialog(context, state.response);
-              }
-            },
-            icon: const Icon(Icons.download),
-            tooltip: 'Download Semua',
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          centerTitle: true,
+          title: Text(
+            "Result",
+            style: GoogleFonts.roboto(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ],
-        automaticallyImplyLeading: false,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1.0),
-          child: Container(color: Colors.black, height: 1.0),
+          leading: IconButton(
+            onPressed: () {
+              _removeImages();
+              Navigator.of(context).pushReplacementNamed(homeRoute);
+            },
+            icon: Icon(Icons.arrow_back, size: 24),
+          ),
+          actions: [
+            IconButton(
+              onPressed: () {
+                final state = context.read<MangaImageBloc>().state;
+                if (state is MangaImageLoaded) {
+                  showDownloadDialog(context, state.response);
+                }
+              },
+              icon: const Icon(Icons.download),
+              tooltip: 'Download Semua',
+            ),
+          ],
+          automaticallyImplyLeading: false,
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(1.0),
+            child: Container(color: Colors.black, height: 1.0),
+          ),
         ),
+        body: _body(),
       ),
-      body: _body(),
     );
   }
 }
