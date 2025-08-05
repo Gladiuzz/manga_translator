@@ -11,7 +11,7 @@ abstract class MangaImageRepository {
 class MangaImageService implements MangaImageRepository {
   final Dio dio = Dio();
   // final String baseUrl = 'http://192.168.100.202:8000/translate';
-  final String baseUrl = 'https://cdbf404cba21.ngrok-free.app/translate';
+  final String baseUrl = 'https://b6dba0f5bb9c.ngrok-free.app/translate';
 
   @override
   Future<File?> uploadImage(MangaImageModel manga) async {

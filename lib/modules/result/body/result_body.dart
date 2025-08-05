@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:manga_translator/bloc/history_bloc.dart';
 import 'package:manga_translator/bloc/manga_image_bloc.dart';
+import 'package:manga_translator/config/config.dart';
 import 'package:manga_translator/models/manga_image_model.dart';
 import 'package:manga_translator/routes/routes.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -226,13 +227,14 @@ class _ResultBodyState extends State<ResultBody> {
         resizeToAvoidBottomInset: true,
         backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: secondaryColor,
           centerTitle: true,
           title: Text(
             "Result",
             style: GoogleFonts.roboto(
               fontSize: 16,
               fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
           ),
           leading: IconButton(
@@ -240,7 +242,7 @@ class _ResultBodyState extends State<ResultBody> {
               _removeImages();
               Navigator.of(context).pushReplacementNamed(homeRoute);
             },
-            icon: Icon(Icons.arrow_back, size: 24),
+            icon: Icon(Icons.arrow_back, size: 24, color: Colors.white),
           ),
           actions: [
             IconButton(
@@ -252,6 +254,7 @@ class _ResultBodyState extends State<ResultBody> {
               },
               icon: const Icon(Icons.download),
               tooltip: 'Download Semua',
+              color: Colors.white,
             ),
           ],
           automaticallyImplyLeading: false,

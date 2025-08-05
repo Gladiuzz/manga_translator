@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:manga_translator/bloc/history_bloc.dart';
+import 'package:manga_translator/config/config.dart';
 import 'package:manga_translator/models/manga_image_model.dart';
 import 'package:manga_translator/modules/history/item/history_card.dart';
 import 'package:manga_translator/routes/routes.dart';
@@ -118,19 +119,22 @@ class _HistoryBodyState extends State<HistoryBody> {
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: secondaryColor,
         centerTitle: true,
         title: selectionMode
             ? Text("${selectedIds.length} dipilih", style: GoogleFonts.roboto())
             : Text(
                 "History",
-                style: GoogleFonts.roboto(fontWeight: FontWeight.bold),
+                style: GoogleFonts.roboto(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
         leading: IconButton(
           onPressed: () {
             Navigator.of(context).pop();
           },
-          icon: const Icon(Icons.arrow_back, size: 24),
+          icon: const Icon(Icons.arrow_back, size: 24, color: Colors.white),
         ),
         actions: [
           if (selectionMode)

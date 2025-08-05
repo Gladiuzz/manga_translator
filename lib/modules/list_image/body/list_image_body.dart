@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:manga_translator/bloc/manga_image_bloc.dart';
+import 'package:manga_translator/config/config.dart';
 import 'package:manga_translator/routes/routes.dart';
 
 class ListImageBody extends StatefulWidget {
@@ -194,7 +195,7 @@ class _ListImageBodyState extends State<ListImageBody> {
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               child: ElevatedButton(
                                 onPressed: () {
-                                  Navigator.pushNamed(
+                                  Navigator.pushReplacementNamed(
                                     context,
                                     loadingRoute,
                                     arguments: images,
@@ -228,11 +229,15 @@ class _ListImageBodyState extends State<ListImageBody> {
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: secondaryColor,
         centerTitle: true,
         title: Text(
           "List Image",
-          style: GoogleFonts.roboto(fontSize: 16, fontWeight: FontWeight.bold),
+          style: GoogleFonts.roboto(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
         automaticallyImplyLeading: false,
         leading: IconButton(
@@ -240,11 +245,11 @@ class _ListImageBodyState extends State<ListImageBody> {
             _removeImages();
             Navigator.of(context).pop();
           },
-          icon: Icon(Icons.arrow_back, size: 24),
+          icon: Icon(Icons.arrow_back, size: 24, color: Colors.white),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1.0),
-          child: Container(color: Colors.black, height: 1.0),
+          child: Container(color: Colors.white, height: 1.0),
         ),
       ),
       body: _body(),

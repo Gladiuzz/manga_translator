@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:manga_translator/config/config.dart';
 import 'package:manga_translator/models/manga_image_model.dart';
 import 'package:photo_view/photo_view.dart';
 
@@ -127,23 +128,28 @@ class _HistoryDetailBodyState extends State<HistoryDetailBody> {
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: secondaryColor,
         centerTitle: true,
         title: Text(
           "History Detail",
-          style: GoogleFonts.roboto(fontSize: 18, fontWeight: FontWeight.bold),
+          style: GoogleFonts.roboto(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
         leading: IconButton(
           onPressed: () {
             Navigator.of(context).pop();
           },
-          icon: Icon(Icons.arrow_back, size: 24),
+          icon: Icon(Icons.arrow_back, size: 24, color: Colors.white),
         ),
         actions: [
           IconButton(
             icon: const Icon(Icons.info_outline),
             onPressed: () => _showMetaDialog(context),
             tooltip: "Info Translasi",
+            color: Colors.white,
           ),
         ],
         automaticallyImplyLeading: false,

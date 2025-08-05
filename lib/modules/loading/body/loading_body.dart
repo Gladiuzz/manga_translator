@@ -19,6 +19,7 @@ class _LoadingBodyState extends State<LoadingBody> {
   MangaImageBloc? mangaImageBloc;
   late DateTime _startTime;
   int _elapsedSeconds = 0;
+  bool _isDialogShown = false;
 
   @override
   void initState() {
@@ -116,12 +117,7 @@ class _LoadingBodyState extends State<LoadingBody> {
       child: Scaffold(
         backgroundColor: Colors.white,
         body: BlocConsumer<MangaImageBloc, MangaImageState>(
-          listener: (context, state) {
-            print("[STATE] $state");
-
-            if (state is MangaImageLoading) {
-              print(">> Loading");
-            }
+          listener: (context, state) async {
             if (state is MangaImageLoaded) {
               final images = state.response;
 
@@ -129,49 +125,47 @@ class _LoadingBodyState extends State<LoadingBody> {
                   images.isNotEmpty && images.every((img) => img.isTranslated);
 
               if (allTranslated) {
+                _timer?.cancel(); // ❗Matikan timer sebelum pindah halaman
                 Navigator.of(
                   context,
                 ).pushReplacementNamed(resultRoute, arguments: images);
-              } else {
-                print("[INFO] Belum semua gambar diterjemahkan. Tidak lanjut.");
               }
             } else if (state is MangaImageFailed) {
               final text = state.textFailed ?? "";
               final failedImages = state.originalImages;
 
-              if (text.toLowerCase().contains("koneksi")) {
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text("Koneksi Gagal"),
-                    content: const Text(
-                      "Tidak ada koneksi internet. Silakan periksa koneksi Anda.",
+              if (_isDialogShown) return;
+              _isDialogShown = true;
+
+              final result = await showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text("Gagal"),
+                  content: Text(text),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(true); // return value = true
+                      },
+                      child: const Text("OK"),
                     ),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          // Kirim kembali gambar ke BLoC agar tampil lagi
-                          context.read<MangaImageBloc>().add(RemoveImages());
-                          context.read<MangaImageBloc>().add(
-                            AddImages(
-                              failedImages.map((e) => e.path!).toList(),
-                            ),
-                          );
-                          Navigator.of(
-                            context,
-                          ).pushReplacementNamed(listImageRoute);
-                        },
-                        child: const Text("OK"),
-                      ),
-                    ],
-                  ),
+                  ],
+                ),
+              );
+
+              if (result == true) {
+                _timer?.cancel(); // ❗Pastikan timer dimatikan
+                context.read<MangaImageBloc>().add(RemoveImages());
+                context.read<MangaImageBloc>().add(
+                  AddImages(failedImages.map((e) => e.path!).toList()),
                 );
+                Navigator.of(context).pushReplacementNamed(listImageRoute);
+                _isDialogShown = false;
               }
             }
           },
           builder: (context, state) {
-            return _body();
+            return _body(); // kode tampilannya
           },
         ),
       ),
