@@ -32,6 +32,7 @@ A Flutter mobile application that translates Japanese manga pages into indonesia
 
 ## 🛠️ Tech Stack
 
+### Mobile (Frontend)
 | Technology | Usage |
 |---|---|
 | [Flutter](https://flutter.dev) | Cross-platform mobile framework |
@@ -40,6 +41,16 @@ A Flutter mobile application that translates Japanese manga pages into indonesia
 | Repository Pattern | Data layer abstraction |
 | [Hive](https://pub.dev/packages/hive) | Local storage for translation history |
 
+### Backend & ML (Private)
+| Technology | Usage |
+|---|---|
+| Python | Core pipeline language |
+| FastAPI | REST API framework |
+| Faster R-CNN | Panel, text & text effect detection |
+| MangaOCR | Japanese text recognition |
+| GPT-4 | Japanese → Indonesian translation |
+| OpenCV | Image preprocessing & inpainting |
+| PyTorch | Deep learning framework |
 ---
 
 ## 🏗️ Architecture
@@ -87,7 +98,7 @@ flutter run
 
 ---
 
-## 🗺️ Roadmap
+## 🗺️ Future Development
 
 - [ ] Refactor to Clean Architecture (feature-based structure)
 - [ ] Add dependency injection with `get_it`
