@@ -116,5 +116,5 @@ This project is for portfolio and educational purposes.
 
 ## 🙋 Author
 
-**Your Name**
-[GitHub](https://github.com/yourusername) · [LinkedIn](https://linkedin.com/in/yourprofile)
+**Gladiuzz**
+[GitHub](https://github.com/Gladiuzz) · [LinkedIn](https://www.linkedin.com/in/hasin-bashari-panansah/)
