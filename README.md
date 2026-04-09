@@ -11,7 +11,13 @@ A Flutter mobile application that translates Japanese manga pages into indonesia
   &nbsp;&nbsp;&nbsp;
   <img src="./assets/demo/demo2.gif" width="300" alt="Manga Translator Demo 2"/>
 </p>
+
 ---
+
+## 📸 Screenshots
+| Upload Page | Translation Result | History | History Detail |
+|:-----------:|:-----------------:|:-------:|:--------------:|
+| <img src="./assets/screenshot/ss_upload.jpeg" width="200"/> | <img src="./assets/screenshot/ss_result.jpeg" width="200"/> | <img src="./assets/screenshot/ss2.jpeg" width="200"/> | <img src="./assets/screenshot/ss1.jpeg" width="200"/> |
 
 ## ✨ Features
 
