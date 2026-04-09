@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:manga_translator/bloc/history_bloc.dart';
-import 'package:manga_translator/config/config.dart';
+import 'package:manga_translator/config/app_color.dart';
 import 'package:manga_translator/models/manga_image_model.dart';
 import 'package:manga_translator/modules/history/item/history_card.dart';
 import 'package:manga_translator/routes/routes.dart';
@@ -44,7 +44,7 @@ class _HistoryBodyState extends State<HistoryBody> {
             return Align(
               alignment: Alignment.center,
               child: Text(
-                "Tidak Ada History Penerjemahan",
+                "Tidak Ada History terjemahan",
                 textAlign: TextAlign.center,
                 style: GoogleFonts.roboto(
                   fontSize: 14,
@@ -68,6 +68,7 @@ class _HistoryBodyState extends State<HistoryBody> {
 
               return HistoryCard(
                 title: item.title,
+                id: item.id,
                 translateDate: item.translateDate,
                 imagePaths: imageModels,
                 color: selectedIds.contains(item.id)
@@ -98,6 +99,7 @@ class _HistoryBodyState extends State<HistoryBody> {
                 onLongPress: () {
                   setState(() {
                     selectionMode = true;
+                    print("Selected ID: ${item.id}");
                     selectedIds.add(item.id);
                   });
                 },
@@ -119,10 +121,16 @@ class _HistoryBodyState extends State<HistoryBody> {
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: secondaryColor,
+        backgroundColor: AppColor.secondaryColor,
         centerTitle: true,
         title: selectionMode
-            ? Text("${selectedIds.length} dipilih", style: GoogleFonts.roboto())
+            ? Text(
+                "${selectedIds.length} dipilih",
+                style: GoogleFonts.roboto(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              )
             : Text(
                 "History",
                 style: GoogleFonts.roboto(
@@ -140,6 +148,7 @@ class _HistoryBodyState extends State<HistoryBody> {
           if (selectionMode)
             IconButton(
               icon: const Icon(Icons.delete),
+              color: Colors.white,
               onPressed: () {
                 // Hapus semua id yang dipilih
                 context.read<HistoryBloc>().add(

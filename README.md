@@ -1,16 +1,103 @@
-# manga_translator
+# 🎌 Manga Translator
 
-A new Flutter project.
+A Flutter mobile application that translates Japanese manga pages into indonesian powered by a deep learning backend for object detection, OCR and automatic translation.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## 📱 Demo
 
-A few resources to get you started if this is your first Flutter project:
+<p align="center">
+  <img src="./assets/demo/demo1.gif" width="300" alt="Manga Translator Demo 1"/>
+  &nbsp;&nbsp;&nbsp;
+  <img src="./assets/demo/demo2.gif" width="300" alt="Manga Translator Demo 2"/>
+</p>
+---
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## ✨ Features
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- 📤 **Upload manga page** — supports JPG,PNG and PDF formats
+- 🔍 **Automatic detection** — detects panels, text balloons, and text effects via ML backend
+- 🈯 **Japanese OCR** — extracts Japanese text from detected regions
+- 🌐 **Auto translation** — translates extracted text to Indonesian
+- 🖼️ **In-place rendering** — translated text rendered back onto the original manga page
+- 📜 **Translation history** — stores and displays past translation results, saved locally on device
+
+---
+
+## 🛠️ Tech Stack
+
+| Technology | Usage |
+|---|---|
+| [Flutter](https://flutter.dev) | Cross-platform mobile framework |
+| Dart | Programming language |
+| [BLoC](https://bloclibrary.dev/) | State management |
+| Repository Pattern | Data layer abstraction |
+| [Hive](https://pub.dev/packages/hive) | Local storage for translation history |
+
+---
+
+## 🏗️ Architecture
+
+This app follows a **BLoC + Repository pattern**, communicating with a private Python backend that handles all ML inference (object detection, OCR, and translation).
+
+```
+Flutter App
+    │
+    ├── Hive (local)      ← save & load translation history
+    │
+    │  HTTP (image upload + result)
+    ▼
+FastAPI Backend (private)
+    │
+    ├── /translate        ← receive image, return translated result
+    └── /history          ← fetch translation history
+         │
+         └── ML Pipeline (private)
+               └── Faster R-CNN · MangaOCR · GPT-4
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Flutter SDK `>=3.0.0`
+- Android SDK `>=33` (API 33+ recommended, tested on API 36)
+- The ML backend running locally (private repo)
+
+### Installation
+
+```bash
+git clone https://github.com/yourusername/manga-translator-app.git
+cd manga-translator-app
+flutter pub get
+```
+
+Run the app:
+```bash
+flutter run
+```
+
+---
+
+## 🗺️ Roadmap
+
+- [ ] Refactor to Clean Architecture (feature-based structure)
+- [ ] Add dependency injection with `get_it`
+- [ ] Improve error handling & loading states
+- [ ] Connect to deployed cloud backend
+- [ ] Add dark mode support
+
+---
+
+## 📄 License
+
+This project is for portfolio and educational purposes.
+
+---
+
+## 🙋 Author
+
+**Your Name**
+[GitHub](https://github.com/yourusername) · [LinkedIn](https://linkedin.com/in/yourprofile)

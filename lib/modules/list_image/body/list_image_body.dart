@@ -1,12 +1,14 @@
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:manga_translator/bloc/manga_image_bloc.dart';
-import 'package:manga_translator/config/config.dart';
+import 'package:manga_translator/config/app_color.dart';
 import 'package:manga_translator/routes/routes.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:pdfx/pdfx.dart';
 
 class ListImageBody extends StatefulWidget {
   const ListImageBody({super.key});
@@ -17,7 +19,6 @@ class ListImageBody extends StatefulWidget {
 
 class _ListImageBodyState extends State<ListImageBody> {
   MangaImageBloc? mangaImageBloc;
-  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -25,44 +26,48 @@ class _ListImageBodyState extends State<ListImageBody> {
     mangaImageBloc = context.read<MangaImageBloc>();
   }
 
-  // Future<void> pickImageAndAdd(BuildContext context) async {
-  //   final state = context.read<MangaImageBloc>().state;
-  //   int currentCount = 0;
-  //   if (state is MangaImageLoaded) {
-  //     currentCount = state.response.length;
-  //   }
+  Future<bool> pickFileAndAdd(BuildContext context) async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      allowMultiple: true,
+      type: FileType.custom,
+      allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
+    );
 
-  //   const maxImages = 4;
-  //   final remaining = maxImages - currentCount;
+    if (result == null || result.files.isEmpty) return false;
 
-  //   if (remaining <= 0) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(content: Text('Maksimal 4 gambar yang boleh diupload')),
-  //     );
-  //     return;
-  //   }
+    List<String> allImagePaths = [];
 
-  //   final pickedFiles = await _picker.pickMultiImage();
+    for (final file in result.files) {
+      final ext = file.extension?.toLowerCase();
+      final filePath = file.path!;
+      if (ext == 'jpg' || ext == 'jpeg' || ext == 'png') {
+        // Jika file gambar, langsung masukkan
+        allImagePaths.add(filePath);
+      } else if (ext == 'pdf') {
+        // Jika PDF, ekstrak semua halaman jadi gambar pakai pdfx
+        final document = await PdfDocument.openFile(filePath);
+        final tempDir = await getTemporaryDirectory();
 
-  //   if (pickedFiles.isEmpty) {
-  //     return;
-  //   }
+        for (int i = 1; i <= document.pagesCount; i++) {
+          final page = await document.getPage(i);
+          final pageImage = await page.render(
+            width: page.width,
+            height: page.height,
+            format: PdfPageImageFormat.png,
+          );
+          final tempFile = File('${tempDir.path}/${file.name}_page_$i.png');
+          await tempFile.writeAsBytes(pageImage!.bytes);
+          allImagePaths.add(tempFile.path);
+          await page.close();
+        }
+        await document.close();
+      }
+    }
 
-  //   // Ambil hanya sejumlah yang dibolehkan
-  //   final limitedFiles = pickedFiles.take(remaining).toList();
-  //   final paths = limitedFiles.map((xfile) => xfile.path).toList();
+    if (allImagePaths.isEmpty) return false;
 
-  //   context.read<MangaImageBloc>().add(AddImages(paths));
-  // }
-
-  Future<void> pickImageAndAdd(BuildContext context) async {
-    final pickedFiles = await _picker.pickMultiImage();
-
-    if (pickedFiles.isEmpty) return;
-
-    final paths = pickedFiles.map((xfile) => xfile.path).toList();
-
-    mangaImageBloc!.add(AddImages(paths));
+    mangaImageBloc!.add(AddImages(allImagePaths));
+    return true;
   }
 
   void _removeImages() {
@@ -100,7 +105,7 @@ class _ListImageBodyState extends State<ListImageBody> {
           IconButton(
             onPressed: () {
               setState(() {
-                pickImageAndAdd(context);
+                pickFileAndAdd(context);
               });
             },
             icon: Icon(Icons.add, size: 24),
@@ -229,7 +234,7 @@ class _ListImageBodyState extends State<ListImageBody> {
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: secondaryColor,
+        backgroundColor: AppColor.secondaryColor,
         centerTitle: true,
         title: Text(
           "List Image",

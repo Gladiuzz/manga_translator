@@ -54,23 +54,17 @@ class MangaImageBloc extends Bloc<MangaImageEvent, MangaImageState> {
 
     emit(MangaImageLoading());
 
-    final List<MangaImageModel> translatedResults = [];
-
     try {
-      for (final image in currentState.response) {
-        final file = await repository.uploadImage(image);
-        if (file != null) {
-          translatedResults.add(
-            MangaImageModel(
-              path: file.path,
-              index: image.index,
-              isTranslated: true,
-            ),
-          );
-        }
-      }
+      // Kirim SEMUA gambar dalam 1 request
+      final paths = await repository.uploadImages(currentState.response);
+      print("Uploaded paths: $paths");
 
-      if (translatedResults.isNotEmpty) {
+      if (paths.isNotEmpty) {
+        // Convert ke MangaImageModel kalau mau
+        final translatedResults = [
+          for (var i = 0; i < paths.length; i++)
+            MangaImageModel(path: paths[i].path, index: i, isTranslated: true),
+        ];
         emit(MangaImageLoaded(response: translatedResults));
       }
     } catch (e) {

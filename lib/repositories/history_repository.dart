@@ -8,7 +8,7 @@ abstract class HistoryRepository {
   Future<void> saveHistory(String title, List<MangaImageModel> imagePaths);
   Future<List<HistoryModel>> getAll();
   Future<void> deleteHistory(int index);
-  Future<void> deleteMultiple(List<int> indexes);
+  Future<void> deleteMultiple(List<int> ids);
 }
 
 class HistoryService implements HistoryRepository {
@@ -21,8 +21,6 @@ class HistoryService implements HistoryRepository {
     String title,
     List<MangaImageModel> imagePaths,
   ) async {
-    final nextId = box.length;
-
     // Ambil hanya path-nya saja
     final pathList = imagePaths.map((e) => e.path ?? '').toList();
 
@@ -30,10 +28,12 @@ class HistoryService implements HistoryRepository {
       title: title,
       translateDate: DateTime.now(),
       imagePaths: pathList, // << List<String>
-      id: nextId,
+      id: 0, // placeholder
     );
 
-    await box.add(history);
+    final key = await box.add(history);
+    history.id = key;
+    await history.save();
   }
 
   @override
@@ -43,42 +43,50 @@ class HistoryService implements HistoryRepository {
   }
 
   @override
-  Future<void> deleteHistory(int index) async {
-    await box.deleteAt(index);
+  Future<void> deleteHistory(int id) async {
+    await _deleteWithFilesById(id);
   }
 
-  Future<void> deleteWithFiles(int index) async {
-    final item = box.getAt(index);
-    if (item != null) {
-      try {
-        final firstImagePath = item.imagePaths.isNotEmpty
-            ? item.imagePaths.first
-            : null;
-        final folder = firstImagePath != null
-            ? File(firstImagePath).parent
-            : null;
+  Future<void> _deleteWithFilesById(int id) async {
+    final item = box.get(id);
+    print("id ${id} item: $item");
+    if (item == null) return;
 
-        for (var path in item.imagePaths) {
-          final file = File(path);
-          if (file.existsSync()) await file.delete();
-        }
+    try {
+      // hapus semua file hasil terjemahan
+      final firstImagePath = item.imagePaths.isNotEmpty
+          ? item.imagePaths.first
+          : null;
+      final folder = firstImagePath != null
+          ? File(firstImagePath).parent
+          : null;
 
-        if (folder != null && folder.existsSync()) {
-          final contents = folder.listSync();
-          if (contents.isEmpty) await folder.delete();
+      for (final path in item.imagePaths) {
+        final file = File(path);
+        if (file.existsSync()) {
+          await file.delete();
         }
-      } catch (e) {
-        print("Gagal menghapus file atau folder: $e");
       }
 
-      await box.deleteAt(index);
+      // jika folder kosong, hapus juga
+      if (folder != null && folder.existsSync()) {
+        final contents = folder.listSync();
+        if (contents.isEmpty) {
+          await folder.delete();
+        }
+      }
+    } catch (e) {
+      print("Gagal menghapus file atau folder: $e");
     }
+
+    // hapus record hive berdasarkan key
+    await box.delete(id);
   }
 
   @override
-  Future<void> deleteMultiple(List<int> indexes) async {
-    for (final index in indexes) {
-      await deleteWithFiles(index);
+  Future<void> deleteMultiple(List<int> ids) async {
+    for (final id in ids) {
+      await _deleteWithFilesById(id);
     }
   }
 }

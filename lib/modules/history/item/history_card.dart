@@ -7,6 +7,7 @@ import 'package:manga_translator/models/manga_image_model.dart';
 
 class HistoryCard extends StatelessWidget {
   final String title;
+  final int id;
   final DateTime translateDate;
   final List<MangaImageModel> imagePaths;
   final VoidCallback? onTap;
@@ -21,6 +22,7 @@ class HistoryCard extends StatelessWidget {
     required this.onTap,
     required this.onLongPress,
     required this.color,
+    required this.id,
   });
 
   @override

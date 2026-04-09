@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:manga_translator/bloc/history_bloc.dart';
 import 'package:manga_translator/bloc/manga_image_bloc.dart';
-import 'package:manga_translator/config/config.dart';
+import 'package:manga_translator/config/app_color.dart';
 import 'package:manga_translator/models/manga_image_model.dart';
 import 'package:manga_translator/routes/routes.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -85,16 +85,6 @@ class _ResultBodyState extends State<ResultBody> {
 
                           if (context.mounted) {
                             Navigator.of(context).pop();
-
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    "Gambar dan riwayat berhasil disimpan.",
-                                  ),
-                                ),
-                              );
-                            });
                           }
                         },
                         child: const Text("Simpan"),
@@ -227,7 +217,7 @@ class _ResultBodyState extends State<ResultBody> {
         resizeToAvoidBottomInset: true,
         backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: secondaryColor,
+          backgroundColor: AppColor.secondaryColor,
           centerTitle: true,
           title: Text(
             "Result",

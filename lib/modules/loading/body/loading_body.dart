@@ -118,14 +118,16 @@ class _LoadingBodyState extends State<LoadingBody> {
         backgroundColor: Colors.white,
         body: BlocConsumer<MangaImageBloc, MangaImageState>(
           listener: (context, state) async {
+            print(state);
             if (state is MangaImageLoaded) {
               final images = state.response;
 
               final allTranslated =
                   images.isNotEmpty && images.every((img) => img.isTranslated);
 
+              print("test allTranslated: $allTranslated");
               if (allTranslated) {
-                _timer?.cancel(); // ❗Matikan timer sebelum pindah halaman
+                _timer?.cancel();
                 Navigator.of(
                   context,
                 ).pushReplacementNamed(resultRoute, arguments: images);
@@ -133,6 +135,7 @@ class _LoadingBodyState extends State<LoadingBody> {
             } else if (state is MangaImageFailed) {
               final text = state.textFailed ?? "";
               final failedImages = state.originalImages;
+              print("gambar : ${state.originalImages}");
 
               if (_isDialogShown) return;
               _isDialogShown = true;

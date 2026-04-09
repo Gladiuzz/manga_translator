@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:manga_translator/config/config.dart';
+import 'package:manga_translator/config/app_color.dart';
 import 'package:manga_translator/models/manga_image_model.dart';
 import 'package:photo_view/photo_view.dart';
 
@@ -128,7 +128,7 @@ class _HistoryDetailBodyState extends State<HistoryDetailBody> {
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: secondaryColor,
+        backgroundColor: AppColor.secondaryColor,
         centerTitle: true,
         title: Text(
           "History Detail",
