@@ -35,11 +35,11 @@ A Flutter mobile application that translates Japanese manga pages into indonesia
 ### Mobile (Frontend)
 | Technology | Usage |
 |---|---|
-| [Flutter](https://flutter.dev) | Cross-platform mobile framework |
+| Flutter | Cross-platform mobile framework |
 | Dart | Programming language |
-| [BLoC](https://bloclibrary.dev/) | State management |
+| BLoC| State management |
 | Repository Pattern | Data layer abstraction |
-| [Hive](https://pub.dev/packages/hive) | Local storage for translation history |
+| Hive | Local storage for translation history |
 
 ### Backend & ML (Private)
 | Technology | Usage |
