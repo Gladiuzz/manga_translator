@@ -110,8 +110,9 @@ flutter run
 
 ### Backend & ML Side
 - [ ] Migration from Faster R-CNN to YOLO for object detection
-- [ ] More precision in Text Effect translation location
+- [ ] Migrate panel sorting from rule-based to graph-based (NetworkX)
 - [ ] Change from OpenCV to LaMa for natural inpainting
+- [ ] More precision in Text Effect translation location
 - [ ] Connect to deployed cloud backend
 - [ ] Add more option for translation language
 
