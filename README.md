@@ -100,11 +100,20 @@ flutter run
 
 ## 🗺️ Future Development
 
+### Mobile Side
 - [ ] Refactor to Clean Architecture (feature-based structure)
 - [ ] Add dependency injection with `get_it`
 - [ ] Improve error handling & loading states
-- [ ] Connect to deployed cloud backend
 - [ ] Add dark mode support
+- [ ] Authentication and feed feature
+- [ ] Add Firebase for Authentication and feed
+
+### Backend & ML Side
+- [ ] Migration from Faster R-CNN to YOLO for object detection
+- [ ] More precision in Text Effect translation location
+- [ ] Change from OpenCV to LaMa for natural inpainting
+- [ ] Connect to deployed cloud backend
+- [ ] Add more option for translation language
 
 ---
 
