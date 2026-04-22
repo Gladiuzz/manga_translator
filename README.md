@@ -101,7 +101,7 @@ flutter run
 ## 🗺️ Future Development
 
 ### Mobile Side
-- [ ] Refactor to Clean Architecture (feature-based structure)
+- [ ] Refactor to Clean Architecture (in the refactoring stage right now)
 - [ ] Add dependency injection with `get_it`
 - [ ] Improve error handling & loading states
 - [ ] Add dark mode support
